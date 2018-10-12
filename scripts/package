@@ -18,8 +18,13 @@ fi
 
 cp ../bin/rke-etcd-backup .
 cp -r ../{conf.d,cert-deployer,templates,nginx-proxy,*.sh} .
-
 IMAGE=${REPO}/rke-tools:${TAG}
-docker build -t ${IMAGE} .
+
+if [ "${ARCH}" != "amd64" ]; then
+	docker build --file Dockerfile.${ARCH} -t ${IMAGE} .
+else
+	docker build -t ${IMAGE} .
+fi
+
 echo ${IMAGE} > ../dist/images
 echo Built ${IMAGE}
