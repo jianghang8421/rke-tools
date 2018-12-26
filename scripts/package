@@ -27,5 +27,6 @@ else
     docker build -t ${IMAGE} .
 fi
 
+echo -n ${TAG} > ../.tags
 echo ${IMAGE} > ../dist/images
 echo Built ${IMAGE}
