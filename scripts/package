@@ -21,11 +21,7 @@ cp -r ../{conf.d,cert-deployer,templates,nginx-proxy,*.sh} .
 
 IMAGE=${REPO}/rke-tools:${TAG}
 
-if [ "$ARCH" == "arm64" ]; then
-    docker build -f Dockerfile.arm64 -t ${IMAGE} .
-else 
-    docker build -t ${IMAGE} .
-fi
+docker build -f Dockerfile.multiarch --build-arg ARCH=${ARCH} -t ${IMAGE} .
 
 echo ${IMAGE} > ../dist/images
 echo Built ${IMAGE}
