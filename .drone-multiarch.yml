@@ -1,0 +1,126 @@
+kind: pipeline
+name: amd64
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: build
+    image: rancher/dapper:1.11.2
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    commands:
+      - dapper ci
+    when:
+      # branch:
+      #   - multiarch-drone-test
+      event:
+        - push
+        - tag
+  - name: stage-binaries
+    image: rancher/dapper:1.11.2
+    commands:
+      - cp -r ./bin/* ./
+    when:
+      # branch:
+      #   - multiarch-drone-test
+      event:
+        - push
+        - tag
+  - name: publish-rke-tools-amd64
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: dockerhub_username
+      password:
+        from_secret: dockerhub_password
+      dockerfile: package/Dockerfile
+      repo: jianghang8421/rke-tools-amd64
+      auto_tag: true
+    when:
+      # branch:
+      #   - multiarch-drone-test
+      event:
+        - tag
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+---
+kind: pipeline
+name: arm64
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+  - name: build
+    image: jianghang8421/dapper-arm64:18.06-git
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    commands:
+      - dapper ci
+    when:
+      branch:
+        - multiarch-drone-test
+      event:
+        - push
+        - tag
+  - name: stage-binaries
+    image: jianghang8421/dapper-arm64:18.06-git
+    commands:
+      - cp -r ./bin/* ./
+    when:
+      branch:
+        - multiarch-drone-test
+      event:
+        - push
+        - tag
+  - name: publish-rke-tools-arm64
+    image: plugins/docker:linux-arm64 
+    settings:
+      username:
+        from_secret: dockerhub_username
+      password:
+        from_secret: dockerhub_password
+      dockerfile: package/Dockerfile.arm64
+      repo: jianghang8421/rke-tools-arm64
+      auto_tag: true
+    when:
+      branch:
+        - multiarch-drone-test
+      event:
+        - tag
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+# ---
+# kind: pipeline
+# name: manifest
+
+# steps:
+#   - name: push-manifest
+#     image: plugins/manifest:1.0.2
+#     settings:
+#       username:
+#         from_secret: dockerhub_username
+#       password:
+#         from_secret: dockerhub_password
+#       target: jianghang8421/rke-tools:${DRONE_TAG}
+#       template: jianghang8421/rke-tools-ARCH:${DRONE_TAG}
+#       platforms:
+#         - linux/amd64
+#         - linux/arm64
+#     when:
+#       branch:
+#         - multiarch-drone-test
+#       event:
+#         - tag
+# depends_on:
+# - amd64
+# - arm64
