@@ -7,14 +7,14 @@ platform:
 
 steps:
   - name: build
-    image: rancher/dapper:1.11.2
+    image: rancher/dapper:v0.4.0
     volumes:
       - name: docker
         path: /var/run/docker.sock
     commands:
       - dapper ci
   - name: stage-binaries
-    image: rancher/dapper:1.11.2
+    image: rancher/dapper:v0.4.0
     commands:
       - cp -r ./bin/* ./
     when:
@@ -49,14 +49,14 @@ platform:
 
 steps:
   - name: build
-    image: jianghang8421/dapper-arm64:18.06-git
+    image: rancher/dapper:v0.4.0
     volumes:
       - name: docker
         path: /var/run/docker.sock
     commands:
       - dapper ci
   - name: stage-binaries
-    image: jianghang8421/dapper-arm64:18.06-git
+    image: rancher/dapper:v0.4.0
     commands:
       - cp -r ./bin/* ./
     when:
